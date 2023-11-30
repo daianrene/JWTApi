@@ -1,4 +1,5 @@
 ﻿using JWTApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -12,11 +13,25 @@ namespace JWTApi.Controllers
     public class AuthController : ControllerBase
     {
         public static User user = new User();
+
         public readonly IConfiguration _configuration;
 
         public AuthController(IConfiguration configuration)
         {
             _configuration = configuration;
+        }
+
+        [HttpGet("protectedWithRole"), Authorize(Roles = "Admin")]
+        public ActionResult<string> protectedWithRole()
+        {
+            return Ok("Eres un usuario autorizado y con rol");
+        }
+
+
+        [HttpGet("protectedAuth"), Authorize]
+        public ActionResult<string> protectedAuth()
+        {
+            return Ok("Eres un usuario autenticado");
         }
 
         [HttpPost("register")]
@@ -26,6 +41,7 @@ namespace JWTApi.Controllers
                 = BCrypt.Net.BCrypt.HashPassword(requestUser.Password);
 
             user.UserName = requestUser.Username;
+            user.Rol = requestUser.Rol;
             user.PasswordHash = passwordHash;
 
             return Ok(user);
@@ -49,13 +65,14 @@ namespace JWTApi.Controllers
         private string createToken(User user)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-                _configuration["JWTSettings:TokenKey"]));
+                _configuration["JWTSettings:TokenKey"]!));
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
 
             List<Claim> claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name,user.UserName),
+                new Claim(ClaimTypes.Role,user.Rol)
             };
 
             var token = new JwtSecurityToken(
