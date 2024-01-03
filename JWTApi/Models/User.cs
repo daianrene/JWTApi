@@ -1,10 +1,10 @@
 ﻿
+using Microsoft.AspNetCore.Identity;
+
 namespace JWTApi.Models
 {
-    public class User
+    public class User : IdentityUser
     {
-        public string UserName { get; set; } = string.Empty;
-        public string PasswordHash { get; set; } = string.Empty;
-        public string Rol { get; set; }
+        public string? Name { get; set; }
     }
 }

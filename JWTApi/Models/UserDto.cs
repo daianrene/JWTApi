@@ -6,10 +6,17 @@ namespace JWTApi.Models
     public class UserDto
     {
         [Required]
-        public string Username { get; set; }
+        public string Name { get; set; } = string.Empty;
         [Required]
-        public string Password { get; set; }
+        [EmailAddress]
+        [DataType(DataType.EmailAddress)]
+        public string Email { get; set; } = string.Empty;
         [Required]
-        public string Rol { get; set; }
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = string.Empty;
+        [Required]
+        [DataType(DataType.Password)]
+        [Compare(nameof(Password))]
+        public string ConfirmPassword { get; set; } = string.Empty;
     }
 }
